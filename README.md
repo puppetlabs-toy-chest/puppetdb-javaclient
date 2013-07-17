@@ -1,7 +1,7 @@
-# Java Client for the PuppetDB Query API
+# Java Client for the PuppetDB API
 
 PuppetDB is the fast, scalable, and reliable data warehouse for Puppet. This client is
-built on top of its http based [Query API](http://docs.puppetlabs.com/puppetdb/1.3/api/query/v2/query.html)
+built on top of its [JSON based API](http://docs.puppetlabs.com/puppetdb/1.3/api/query/v2/query.html)
 to ease the task of accessing PuppetDB from a remote client.
 
 ## Download
