@@ -43,51 +43,11 @@ public class BasicAPIPreferences implements APIPreferences {
 	private File privateKeyPEM;
 
 	/**
-	 * @return the connectTimeout
-	 */
-	@Override
-	public int getConnectTimeout() {
-		return connectTimeout;
-	}
-
-	/**
-	 * @param connectTimeout
-	 *            the connectTimeout to set
-	 */
-	public void setConnectTimeout(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
-	}
-
-	/**
-	 * @return the readTimeout
-	 */
-	@Override
-	public int getReadTimeout() {
-		return readTimeout;
-	}
-
-	/**
-	 * @param readTimeout
-	 *            the readTimeout to set
-	 */
-	public void setReadTimeout(int readTimeout) {
-		this.readTimeout = readTimeout;
-	}
-
-	/**
 	 * @return the caCertPEM
 	 */
 	@Override
 	public File getCaCertPEM() {
 		return caCertPEM;
-	}
-
-	/**
-	 * @param caCertPEM
-	 *            the caCertPEM to set
-	 */
-	public void setCaCertPEM(File caCertPEM) {
-		this.caCertPEM = caCertPEM;
 	}
 
 	/**
@@ -99,11 +59,11 @@ public class BasicAPIPreferences implements APIPreferences {
 	}
 
 	/**
-	 * @param certPEM
-	 *            the certPEM to set
+	 * @return the connectTimeout
 	 */
-	public void setCertPEM(File certPEM) {
-		this.certPEM = certPEM;
+	@Override
+	public int getConnectTimeout() {
+		return connectTimeout;
 	}
 
 	/**
@@ -115,11 +75,21 @@ public class BasicAPIPreferences implements APIPreferences {
 	}
 
 	/**
-	 * @param privateKeyPEM
-	 *            the privateKeyPEM to set
+	 * @return the readTimeout
 	 */
-	public void setPrivateKeyPEM(File privateKeyPEM) {
-		this.privateKeyPEM = privateKeyPEM;
+	@Override
+	public int getReadTimeout() {
+		return readTimeout;
+	}
+
+	@Override
+	public String getServiceHostname() {
+		return serviceHostname;
+	}
+
+	@Override
+	public int getServiceSSLPort() {
+		return serviceSSLPort;
 	}
 
 	@Override
@@ -135,22 +105,44 @@ public class BasicAPIPreferences implements APIPreferences {
 		this.allowAllHosts = allowAllHosts;
 	}
 
-	@Override
-	public int getServiceSSLPort() {
-		return serviceSSLPort;
+	/**
+	 * @param caCertPEM
+	 *            the caCertPEM to set
+	 */
+	public void setCaCertPEM(File caCertPEM) {
+		this.caCertPEM = caCertPEM;
 	}
 
 	/**
-	 * @param serviceSSLPort
-	 *            the serviceSSLPort to set
+	 * @param certPEM
+	 *            the certPEM to set
 	 */
-	public void setServiceSSLPort(int serviceSSLPort) {
-		this.serviceSSLPort = serviceSSLPort;
+	public void setCertPEM(File certPEM) {
+		this.certPEM = certPEM;
 	}
 
-	@Override
-	public String getServiceHostname() {
-		return serviceHostname;
+	/**
+	 * @param connectTimeout
+	 *            the connectTimeout to set
+	 */
+	public void setConnectTimeout(int connectTimeout) {
+		this.connectTimeout = connectTimeout;
+	}
+
+	/**
+	 * @param privateKeyPEM
+	 *            the privateKeyPEM to set
+	 */
+	public void setPrivateKeyPEM(File privateKeyPEM) {
+		this.privateKeyPEM = privateKeyPEM;
+	}
+
+	/**
+	 * @param readTimeout
+	 *            the readTimeout to set
+	 */
+	public void setReadTimeout(int readTimeout) {
+		this.readTimeout = readTimeout;
 	}
 
 	/**
@@ -159,5 +151,13 @@ public class BasicAPIPreferences implements APIPreferences {
 	 */
 	public void setServiceHostname(String serviceHostname) {
 		this.serviceHostname = serviceHostname;
+	}
+
+	/**
+	 * @param serviceSSLPort
+	 *            the serviceSSLPort to set
+	 */
+	public void setServiceSSLPort(int serviceSSLPort) {
+		this.serviceSSLPort = serviceSSLPort;
 	}
 }

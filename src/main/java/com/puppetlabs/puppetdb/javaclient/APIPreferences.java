@@ -17,34 +17,6 @@ import java.io.File;
  */
 public interface APIPreferences {
 	/**
-	 * Connection timeout in milliseconds
-	 * 
-	 * @return A millisecond timeout
-	 */
-	int getConnectTimeout();
-
-	/**
-	 * Read timeout in milliseconds.
-	 * 
-	 * @return A millisecond timeout
-	 */
-	int getReadTimeout();
-
-	/**
-	 * Mandatory setting. The SSL port of the PuppetDB host
-	 * 
-	 * @return A port number
-	 */
-	int getServiceSSLPort();
-
-	/**
-	 * Mandatory setting. The DNS name of the PuppetDB host
-	 * 
-	 * @return The DNS name of the host
-	 */
-	String getServiceHostname();
-
-	/**
 	 * Returns the path of the PEM file that holds the certificate for the Certification Authority.
 	 * 
 	 * @return An absolute path
@@ -59,11 +31,39 @@ public interface APIPreferences {
 	File getCertPEM();
 
 	/**
+	 * Connection timeout in milliseconds
+	 * 
+	 * @return A millisecond timeout
+	 */
+	int getConnectTimeout();
+
+	/**
 	 * Mandatory setting. Returns the path of the PEM file for the Private Key.
 	 * 
 	 * @return An absolute path
 	 */
 	File getPrivateKeyPEM();
+
+	/**
+	 * Read timeout in milliseconds.
+	 * 
+	 * @return A millisecond timeout
+	 */
+	int getReadTimeout();
+
+	/**
+	 * Mandatory setting. The DNS name of the PuppetDB host
+	 * 
+	 * @return The DNS name of the host
+	 */
+	String getServiceHostname();
+
+	/**
+	 * Mandatory setting. The SSL port of the PuppetDB host
+	 * 
+	 * @return A port number
+	 */
+	int getServiceSSLPort();
 
 	/**
 	 * If <code>true</code> then the SSL host name validation will be turned off.

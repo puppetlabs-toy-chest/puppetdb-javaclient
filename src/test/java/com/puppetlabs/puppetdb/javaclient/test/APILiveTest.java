@@ -57,12 +57,6 @@ public class APILiveTest {
 
 	private static String PEM_NAME;
 
-	private static String getRequiredProperty(String propertyName) {
-		String prop = System.getProperty(propertyName);
-		assertNotNull("Missing property '" + propertyName + '\'', prop);
-		return prop;
-	}
-
 	@BeforeClass
 	public static void beforeClass() {
 		PUPPETDB_HOST = getRequiredProperty("puppetdb.hostname");
@@ -70,6 +64,12 @@ public class APILiveTest {
 		NODE_THAT_IS_KNOWN_TO_EXIST = PUPPETDB_HOST;
 		SSL_DIR = new File(getRequiredProperty("ssldir"));
 		PEM_NAME = PUPPETDB_HOST + ".pem";
+	}
+
+	private static String getRequiredProperty(String propertyName) {
+		String prop = System.getProperty(propertyName);
+		assertNotNull("Missing property '" + propertyName + '\'', prop);
+		return prop;
 	}
 
 	@Before
@@ -123,19 +123,19 @@ public class APILiveTest {
 	}
 
 	@Test
-	public void getHostnameFact() throws Exception {
-		List<Fact> facts = client.getFacts(eq(Fact.NAME, "hostname"));
-		assertNotNull("should not return a null list", facts);
-		assertEquals("should return all facts", 1, facts.size());
-	}
-
-	@Test
 	public void getFactsWithClass() throws Exception {
 		List<Fact> facts = client.getFacts(and(
 			eq(Fact.NAME, "hostname"),
 			inResources(Fact.CERTNAME, Resource.CERTNAME, and(eq(Resource.TYPE, "Class"), eq(Resource.TITLE, "main")))));
 		assertNotNull("should not return a null list", facts);
 		assertEquals("should return 1 fact", 1, facts.size());
+	}
+
+	@Test
+	public void getHostnameFact() throws Exception {
+		List<Fact> facts = client.getFacts(eq(Fact.NAME, "hostname"));
+		assertNotNull("should not return a null list", facts);
+		assertEquals("should return all facts", 1, facts.size());
 	}
 
 	@Test

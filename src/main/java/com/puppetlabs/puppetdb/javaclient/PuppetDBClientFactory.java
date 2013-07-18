@@ -20,6 +20,17 @@ import com.puppetlabs.puppetdb.javaclient.impl.DefaultModule;
 public class PuppetDBClientFactory {
 
 	/**
+	 * Create a new PuppetDBClient that will connect using the given <code>preferences</code>.
+	 * 
+	 * @param preferences
+	 *            The preferences used for hte connection
+	 * @return The created client instance
+	 */
+	public static PuppetDBClient newClient(APIPreferences preferences) {
+		return newClient(new DefaultModule(preferences));
+	}
+
+	/**
 	 * Create a new PuppetDBClient using the bindings of one or several
 	 * Guice modules.
 	 * 
@@ -29,16 +40,5 @@ public class PuppetDBClientFactory {
 	 */
 	public static PuppetDBClient newClient(Module... modules) {
 		return Guice.createInjector(modules).getInstance(PuppetDBClient.class);
-	}
-
-	/**
-	 * Create a new PuppetDBClient that will connect using the given <code>preferences</code>.
-	 * 
-	 * @param preferences
-	 *            The preferences used for hte connection
-	 * @return The created client instance
-	 */
-	public static PuppetDBClient newClient(APIPreferences preferences) {
-		return newClient(new DefaultModule(preferences));
 	}
 }
