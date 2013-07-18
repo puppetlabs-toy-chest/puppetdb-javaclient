@@ -29,6 +29,34 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
+						<addMavenDescriptor>false</addMavenDescriptor>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<skip>false</skip>
+					<additionalBuildcommands>
+						<buildcommand>org.eclipse.pde.ManifestBuilder</buildcommand>
+						<buildcommand>org.eclipse.pde.SchemaBuilder</buildcommand>
+					</additionalBuildcommands>
+					<additionalProjectnatures>
+						<projectnature>org.eclipse.pde.PluginNature</projectnature>
+					</additionalProjectnatures>
+					<classpathContainers>
+						<classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
+						<classpathContainer>org.eclipse.pde.core.requiredPlugins</classpathContainer>
+					</classpathContainers>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>1.8</version>
@@ -58,11 +86,11 @@
 					<archive>
 						<manifestEntries>
 							<Bundle-ManifestVersion>2</Bundle-ManifestVersion>
-							<Bundle-Name>Source for the ${name}</Bundle-Name>
-							<Bundle-SymbolicName>${artifactId}.source</Bundle-SymbolicName>
-							<Bundle-Vendor>${organization.name}</Bundle-Vendor>
+							<Bundle-Name>Source for the ${project.name}</Bundle-Name>
+							<Bundle-SymbolicName>${project.artifactId}.source</Bundle-SymbolicName>
+							<Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
 							<Bundle-Version>${parsedVersion.osgiVersion}</Bundle-Version>
-							<Eclipse-SourceBundle>${artifactId};version="${parsedVersion.osgiVersion}";roots:="."</Eclipse-SourceBundle>
+							<Eclipse-SourceBundle>${project.artifactId};version="${parsedVersion.osgiVersion}";roots:="."</Eclipse-SourceBundle>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -72,6 +100,9 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
 				<version>2.4.0</version>
+				<configuration>
+					<manifestLocation>META-INF</manifestLocation>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
