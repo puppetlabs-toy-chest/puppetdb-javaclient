@@ -29,7 +29,7 @@ public class Event extends Entity {
 	 */
 	@SuppressWarnings("javadoc")
 	public enum Status {
-		success, failed, noop, skipped
+		success, failure, noop, skipped
 	}
 
 	@SuppressWarnings("javadoc")
