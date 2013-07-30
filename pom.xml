@@ -18,6 +18,14 @@
 		<ssldir>${user.home}/ssl</ssldir>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>cloudsmith</id>
+			<name>Cloudsmith Release Repository</name>
+			<url>https://am0.cloudsmith.com/nexus/content/repositories/releases/</url>
+		</repository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
 			<plugin>
