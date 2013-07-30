@@ -54,6 +54,17 @@
 						<classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
 						<classpathContainer>org.eclipse.pde.core.requiredPlugins</classpathContainer>
 					</classpathContainers>
+					<additionalConfig>
+						<file>
+							<name>build.properties</name>
+							<content><![CDATA[source.. = src/main/java/
+output.. = target/classes/
+bin.includes = META-INF/,\
+               .
+]]>
+							</content>
+						</file>
+					</additionalConfig>
 				</configuration>
 			</plugin>
 			<plugin>
