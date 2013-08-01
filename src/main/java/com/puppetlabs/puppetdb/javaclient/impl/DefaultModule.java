@@ -10,10 +10,17 @@
  */
 package com.puppetlabs.puppetdb.javaclient.impl;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import com.google.gson.Gson;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.puppetlabs.puppetdb.javaclient.APIPreferences;
 import com.puppetlabs.puppetdb.javaclient.HttpConnector;
@@ -42,5 +49,23 @@ public class DefaultModule extends AbstractModule {
 		bind(SSLSocketFactory.class).toProvider(PEM_SSLSocketFactoryProvider.class).in(Singleton.class);
 		bind(HttpConnector.class).to(HttpComponentsConnector.class);
 		bind(PuppetDBClient.class).to(PuppetDBClientImpl.class);
+	}
+
+	/**
+	 * Provides a HttpClient that is configured with the preferences of this module and the
+	 * injected <code>sslSocketFactory</code>.
+	 * 
+	 * @param sslSocketFactory The injected SSL socket factory
+	 * @return The new HttpClient instance
+	 */
+	@Provides
+	public HttpClient provideHttpClient(SSLSocketFactory sslSocketFactory) {
+		HttpParams params = new BasicHttpParams();
+			HttpConnectionParams.setConnectionTimeout(params, preferences.getConnectTimeout());
+			HttpConnectionParams.setSoTimeout(params, preferences.getReadTimeout());
+
+		DefaultHttpClient httpClient = new DefaultHttpClient(params);
+		httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, sslSocketFactory));
+		return httpClient;
 	}
 }

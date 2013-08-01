@@ -37,17 +37,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 
 import com.google.gson.Gson;
 import com.google.inject.Inject;
@@ -85,16 +79,16 @@ public class HttpComponentsConnector implements HttpConnector {
 	 * 
 	 * @param gson
 	 *            The instance used when parsing or serializing JSON
-	 * @param sslSocketFactory
-	 *            The SSL socket factory to use for the connection
+	 * @param httpClient
+	 *            The client to use for the connection
 	 * @param preferences
 	 *            API connection preferences
 	 */
 	@Inject
-	public HttpComponentsConnector(Gson gson, SSLSocketFactory sslSocketFactory, APIPreferences preferences) {
+	public HttpComponentsConnector(Gson gson, HttpClient httpClient, APIPreferences preferences) {
 		this.gson = gson;
 		this.preferences = preferences;
-		httpClient = createHttpClient(sslSocketFactory);
+		this.httpClient = httpClient;
 	}
 
 	@Override
@@ -136,28 +130,6 @@ public class HttpComponentsConnector implements HttpConnector {
 			bld.append(URLEncodedUtils.format(pairs, UTF_8.name()));
 		}
 		return new HttpGet(URI.create(bld.toString()));
-	}
-
-	/**
-	 * Create a new client that trusts self signed certificates and will allow all hostnames.
-	 * If such a client cannot be created for some reason, then the default client will be used.
-	 * 
-	 * @return The new client
-	 */
-	protected HttpClient createHttpClient(SSLSocketFactory sslSocketFactory) {
-		HttpParams params = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(params, preferences.getConnectTimeout());
-		HttpConnectionParams.setSoTimeout(params, preferences.getReadTimeout());
-
-		HttpClient client = new DefaultHttpClient(params);
-		try {
-			client.getConnectionManager().getSchemeRegistry().register(
-				new Scheme("https", preferences.getServiceSSLPort(), sslSocketFactory));
-		}
-		catch(Exception e) {
-			// let's try without that ...
-		}
-		return client;
 	}
 
 	/**
