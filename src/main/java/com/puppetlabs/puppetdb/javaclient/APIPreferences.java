@@ -49,7 +49,7 @@ public interface APIPreferences {
 	 * 
 	 * @return A millisecond timeout
 	 */
-	int getReadTimeout();
+	int getSoTimeout();
 
 	/**
 	 * Mandatory setting. The DNS name of the PuppetDB host

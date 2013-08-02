@@ -78,7 +78,7 @@ public class BasicAPIPreferences implements APIPreferences {
 	 * @return the readTimeout
 	 */
 	@Override
-	public int getReadTimeout() {
+	public int getSoTimeout() {
 		return readTimeout;
 	}
 
