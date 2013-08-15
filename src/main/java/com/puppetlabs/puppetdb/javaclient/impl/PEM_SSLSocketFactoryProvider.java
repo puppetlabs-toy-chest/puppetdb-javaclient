@@ -11,7 +11,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.KeySpec;
 
-import com.puppetlabs.puppetdb.javaclient.APIPreferences;
 import com.puppetlabs.puppetdb.javaclient.ssl.AbstractSSLSocketFactoryProvider;
 import com.puppetlabs.puppetdb.javaclient.ssl.KeySpecFactory;
 
@@ -24,8 +23,8 @@ import com.puppetlabs.puppetdb.javaclient.ssl.KeySpecFactory;
  * <dt>{@link APIPreferences#getCertPEM() getCertPerm()}</dt>
  * <dd>Mandatory. Included in the certificate chain for the corresponding public key.</dd>
  * <dt>{@link APIPreferences#getCaCertPEM() getCaCertPEM()}</dt>
- * <dd>Optional. If it is present, then the created factory will use a trust store to validate the certificate. Otherwise it will allow self signed
- * certificates.</dd>
+ * <dd>Optional. If it is present, then the created factory will use a trust store to validate the certificate. Otherwise it will allow self
+ * signed certificates.</dd>
  * <dt>{@link APIPreferences#isAllowAllHosts()}</dt>
  * <dd>If <code>true</code>, then the created factory will disable hostname verification.</dd>
  * </dl>

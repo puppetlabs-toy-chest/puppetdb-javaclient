@@ -12,8 +12,6 @@ import java.security.spec.KeySpec;
 
 import javax.net.ssl.TrustManagerFactory;
 
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.conn.ssl.TrustStrategy;
@@ -60,7 +58,8 @@ public abstract class AbstractSSLSocketFactoryProvider implements Provider<SSLSo
 	}
 
 	/**
-	 * Returns the Certificate for the Certificate Authority or <code>null</code> if no such certificate exists. Returning <code>null</code> will
+	 * Returns the Certificate for the Certificate Authority or <code>null</code> if no such certificate exists. Returning <code>null</code>
+	 * will
 	 * cause the created SSL factory to accept self signed certificates.
 	 * 
 	 * @param factory
@@ -149,8 +148,8 @@ public abstract class AbstractSSLSocketFactoryProvider implements Provider<SSLSo
 	protected abstract KeySpec getPrivateKeySpec() throws KeyException, IOException;
 
 	/**
-	 * Creates a new <code>JKS</code> trust store and initializes it with the CA certificate returned by {@link #getCACertificate(CertificateFactory)}
-	 * .
+	 * Creates a new <code>JKS</code> trust store and initializes it with the CA certificate returned by
+	 * {@link #getCACertificate(CertificateFactory)} .
 	 * If that method returns <code>null</code> then this method will also return <code>null</code>.
 	 * 
 	 * @param factory
