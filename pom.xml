@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.puppetlabs.puppetdb</groupId>
 	<artifactId>com.puppetlabs.puppetdb.javaclient</artifactId>
-	<version>0.1.2-SNAPSHOT</version>
+	<version>0.1.2</version>
 	<packaging>bundle</packaging>
 	<name>Java Client for the PuppetDB API</name>
 
@@ -161,7 +160,7 @@ src.excludes = src/test/java/,\
 		<connection>scm:git:git://github.com/puppetlabs/puppetdb-javaclient.git</connection>
 		<url>https://github.com/puppetlabs/puppetdb-javaclient</url>
 		<developerConnection>scm:git:git@github.com:puppetlabs/puppetdb-javaclient.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>com.puppetlabs.puppetdb.javaclient-0.1.2</tag>
 	</scm>
 
 	<issueManagement>
