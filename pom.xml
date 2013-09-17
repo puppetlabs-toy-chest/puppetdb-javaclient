@@ -25,12 +25,12 @@
 		<repository>
 			<id>puppetlabs</id>
 			<name>Puppet Labs Release Repository</name>
-			<url>https://nexus.delivery.puppetlabs.net/nexus/content/repositories/releases/</url>
+			<url>http://nexus.delivery.puppetlabs.net/content/repositories/releases/</url>
 		</repository>
 		<snapshotRepository>
-			<id>puppetlabs-snapshots</id>
+			<id>puppetlabs</id>
 			<name>Puppet Labs Snapshot Repository</name>
-			<url>https://nexus.delivery.puppetlabs.net/nexus/content/repositories/snapshots/</url>
+			<url>http://nexus.delivery.puppetlabs.net/content/repositories/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
