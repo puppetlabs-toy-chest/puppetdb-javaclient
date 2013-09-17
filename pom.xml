@@ -144,7 +144,9 @@ src.excludes = src/test/java/,\
 						<puppetdb.port>${puppetdb.port}</puppetdb.port>
 						<ssldir>${ssldir}</ssldir>
 					</systemPropertyVariables>
-					<excludes>**/APILiveTest.java</excludes>
+					<excludes>
+						<exclude>**/APILiveTest.java</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>
