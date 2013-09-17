@@ -23,10 +23,15 @@
 
 	<distributionManagement>
 		<repository>
-			<id>cloudsmith</id>
-			<name>Cloudsmith Release Repository</name>
-			<url>https://am0.cloudsmith.com/nexus/content/repositories/releases/</url>
+			<id>puppetlabs</id>
+			<name>Puppet Labs Release Repository</name>
+			<url>https://nexus.delivery.puppetlabs.net/nexus/content/repositories/releases/</url>
 		</repository>
+		<snapshotRepository>
+			<id>puppetlabs-snapshots</id>
+			<name>Puppet Labs Snapshot Repository</name>
+			<url>https://nexus.delivery.puppetlabs.net/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
 	</distributionManagement>
 
 	<build>
