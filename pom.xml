@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.puppetlabs.puppetdb</groupId>
 	<artifactId>com.puppetlabs.puppetdb.javaclient</artifactId>
-	<version>0.1.3</version>
+	<version>0.1.4-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 	<name>Java Client for the PuppetDB API</name>
 
