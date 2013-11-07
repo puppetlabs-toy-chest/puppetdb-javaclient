@@ -66,7 +66,7 @@ public class APILiveTest {
 	public void before() {
 		BasicAPIPreferences prefs = new BasicAPIPreferences();
 		prefs.setServiceHostname(PUPPETDB_HOST);
-		prefs.setServiceSSLPort(PUPPETDB_PORT);
+		prefs.setServicePort(PUPPETDB_PORT);
 		prefs.setAllowAllHosts(false);
 		File caCertPem = new File(new File(SSL_DIR, "ca"), "ca_crt.pem");
 		if(caCertPem.canRead())

@@ -157,7 +157,7 @@ public class BasicAPIPreferences implements APIPreferences {
 	 * @param serviceSSLPort
 	 *            the serviceSSLPort to set
 	 */
-	public void setServiceSSLPort(int serviceSSLPort) {
+	public void setServicePort(int serviceSSLPort) {
 		this.serviceSSLPort = serviceSSLPort;
 	}
 }
