@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.puppetlabs.puppetdb</groupId>
 	<artifactId>com.puppetlabs.puppetdb.javaclient</artifactId>
-	<version>0.1.5</version>
+	<version>0.1.6-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 	<name>Java Client for the PuppetDB API</name>
 
@@ -160,7 +160,7 @@ src.excludes = src/test/java/,\
 		<connection>scm:git:git://github.com/puppetlabs/puppetdb-javaclient.git</connection>
 		<url>https://github.com/puppetlabs/puppetdb-javaclient</url>
 		<developerConnection>scm:git:git@github.com:puppetlabs/puppetdb-javaclient.git</developerConnection>
-		<tag>com.puppetlabs.puppetdb.javaclient-0.1.5</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<issueManagement>
