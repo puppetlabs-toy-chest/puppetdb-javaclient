@@ -50,7 +50,10 @@ public class DefaultModule extends AbstractModule {
 		bind(Integer.class).annotatedWith(Names.named(CoreConnectionPNames.CONNECTION_TIMEOUT)).toInstance(preferences.getConnectTimeout());
 		bind(Integer.class).annotatedWith(Names.named(CoreConnectionPNames.SO_TIMEOUT)).toInstance(preferences.getSoTimeout());
 		bind(Gson.class).toProvider(GsonProvider.class);
-		bind(SSLSocketFactory.class).toProvider(PEM_SSLSocketFactoryProvider.class).in(Singleton.class);
+		if(preferences.getCertPEM() != null)
+			bind(SSLSocketFactory.class).toProvider(PEM_SSLSocketFactoryProvider.class).in(Singleton.class);
+		else
+			bind(SSLSocketFactory.class).toInstance(SSLSocketFactory.getSocketFactory());
 		bind(HttpConnector.class).to(HttpComponentsConnector.class);
 		bind(PuppetDBClient.class).to(PuppetDBClientImpl.class);
 	}
@@ -70,7 +73,8 @@ public class DefaultModule extends AbstractModule {
 		HttpConnectionParams.setSoTimeout(params, preferences.getSoTimeout());
 
 		DefaultHttpClient httpClient = new DefaultHttpClient(params);
-		httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, sslSocketFactory));
+		if(preferences.getCertPEM() != null)
+			httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, sslSocketFactory));
 		return httpClient;
 	}
 }

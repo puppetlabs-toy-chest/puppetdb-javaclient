@@ -10,15 +10,8 @@
  */
 package com.puppetlabs.puppetdb.javaclient.test;
 
-import static com.puppetlabs.puppetdb.javaclient.query.Query.and;
-import static com.puppetlabs.puppetdb.javaclient.query.Query.eq;
-import static com.puppetlabs.puppetdb.javaclient.query.Query.inFacts;
-import static com.puppetlabs.puppetdb.javaclient.query.Query.inResources;
-import static com.puppetlabs.puppetdb.javaclient.query.Query.match;
-import static com.puppetlabs.puppetdb.javaclient.query.Query.or;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static com.puppetlabs.puppetdb.javaclient.query.Query.*;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,13 +28,10 @@ import org.junit.Test;
 import com.puppetlabs.puppetdb.javaclient.BasicAPIPreferences;
 import com.puppetlabs.puppetdb.javaclient.PuppetDBClient;
 import com.puppetlabs.puppetdb.javaclient.PuppetDBClientFactory;
-import com.puppetlabs.puppetdb.javaclient.model.Event;
+import com.puppetlabs.puppetdb.javaclient.model.*;
 import com.puppetlabs.puppetdb.javaclient.model.Event.Status;
-import com.puppetlabs.puppetdb.javaclient.model.Fact;
-import com.puppetlabs.puppetdb.javaclient.model.Facts;
-import com.puppetlabs.puppetdb.javaclient.model.Node;
-import com.puppetlabs.puppetdb.javaclient.model.Report;
-import com.puppetlabs.puppetdb.javaclient.model.Resource;
+import com.puppetlabs.puppetdb.javaclient.model.EventCount.SummarizeBy;
+import com.puppetlabs.puppetdb.javaclient.query.Paging;
 
 @SuppressWarnings("javadoc")
 public class APILiveTest {
@@ -94,6 +84,15 @@ public class APILiveTest {
 	}
 
 	@Test
+	public void getAggregatedEventCounts() throws Exception {
+		AggregatedEventCount aec = client.getAggregatedEventCounts(
+			null, eq(Event.CERTNAME, NODE_THAT_IS_KNOWN_TO_EXIST), SummarizeBy.certname, null);
+		assertNotNull("should not return a null instance", aec);
+		assertTrue("should have a successful count > 0", aec.getSuccesses() > 0);
+		assertTrue("should have a total count > 0", aec.getTotal() > 0);
+	}
+
+	@Test
 	public void getClassesWithQuery() throws Exception {
 		List<Resource> classes = client.getResources(or(eq(Resource.TITLE, "main"), eq(Resource.TITLE, "Settings")), "Class");
 		assertNotNull("should not return a null list", classes);
@@ -109,10 +108,22 @@ public class APILiveTest {
 	}
 
 	@Test
+	public void getEventCounts() throws Exception {
+		List<EventCount> eventCounts = client.getEventCounts(
+			orderBy(null, orderByField(EventCount.FAILURES, false)), eq(Event.CERTNAME, NODE_THAT_IS_KNOWN_TO_EXIST), SummarizeBy.certname,
+			null);
+		assertNotNull("should not return a null list", eventCounts);
+		assertTrue("should return events", eventCounts.size() > 0);
+		assertTrue("should have a successful count > 0", eventCounts.get(0).getSuccesses() > 0);
+	}
+
+	@Test
 	public void getEvents() throws Exception {
-		List<Event> events = client.getEvents(eq(Event.CERTNAME, NODE_THAT_IS_KNOWN_TO_EXIST));
+		Paging<Event> paging = new Paging<Event>(eq(Event.CERTNAME, NODE_THAT_IS_KNOWN_TO_EXIST), 0, 10, true);
+		List<Event> events = client.getEvents(paging);
 		assertNotNull("should not return a null list", events);
 		assertTrue("should return events", events.size() > 0);
+		assertTrue("should return total count", paging.getTotalCount() > 0);
 	}
 
 	@Test
@@ -162,7 +173,7 @@ public class APILiveTest {
 	@Test
 	public void getNodesWithFacts() throws Exception {
 		List<Node> node = client.getActiveNodes(inFacts(
-			Node.NAME, Fact.CERTNAME, and(eq(Fact.NAME, "puppetversion"), match(Fact.VALUE, "^3\\.2.*"))));
+			Node.NAME, Fact.CERTNAME, and(eq(Fact.NAME, "puppetversion"), match(Fact.VALUE, "^3\\.3.*"))));
 		assertNotNull("should not return a null list", node);
 		assertEquals("should return one node", 1, node.size());
 	}
@@ -182,9 +193,24 @@ public class APILiveTest {
 		List<Report> reports = client.getReports(eq(Report.CERTNAME, NODE_THAT_IS_KNOWN_TO_EXIST));
 		assertNotNull("should not return a null list", reports);
 		assertTrue("should return reports", reports.size() > 0);
+		assertNotNull("should have a transaction UUID", reports.get(0).getTransactionUUID());
 	}
 
-	// @Test
+	@Test
+	public void getServerTime() throws Exception {
+		Date serverTime = client.getServerTime();
+		assertNotNull("should not return a null date", serverTime);
+		assertTrue("should return a reasonable timestamp", Math.abs(System.currentTimeMillis() - serverTime.getTime()) < 1000);
+	}
+
+	@Test
+	public void getVersion() throws Exception {
+		String version = client.getVersion();
+		assertNotNull("should not return a null version", version);
+		assertTrue("should return a version", version.matches("[1-9]+\\.[0-9]+\\.[0-9]"));
+	}
+
+	@Test
 	public void replaceFacts() throws Exception {
 		// Retrieve the current facts
 		List<String> names = client.getFactNames();
@@ -203,7 +229,6 @@ public class APILiveTest {
 		newFacts.setValues(values);
 		UUID uuid = client.replaceFacts(newFacts);
 		assertNotNull("should not return a null command uuid", uuid);
-		System.out.println(uuid);
 
 		// Command is asynchronous. Give it some time
 		Thread.sleep(2000);
@@ -215,7 +240,7 @@ public class APILiveTest {
 		assertNotNull("should not return a null command uuid", client.replaceFacts(newFacts));
 	}
 
-	// @Test
+	@Test
 	public void storeReport() throws Exception {
 		List<Report> reports = client.getReports(eq(Report.CERTNAME, NODE_THAT_IS_KNOWN_TO_EXIST));
 		assertNotNull("should not return a null list", reports);

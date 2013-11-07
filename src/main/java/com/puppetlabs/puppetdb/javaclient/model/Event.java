@@ -13,6 +13,7 @@ package com.puppetlabs.puppetdb.javaclient.model;
 import static com.puppetlabs.puppetdb.javaclient.query.Query.field;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -45,6 +46,15 @@ public class Event extends Entity {
 	public static final Field<Event> TIMESTAMP = field("timestamp");
 
 	@SuppressWarnings("javadoc")
+	public static final Field<Event> RUN_START_TIME = field("run-start-time");
+
+	@SuppressWarnings("javadoc")
+	public static final Field<Event> RUN_END_TIME = field("run-end-time");
+
+	@SuppressWarnings("javadoc")
+	public static final Field<Event> REPORT_RECEIVE_TIME = field("report-receive-time");
+
+	@SuppressWarnings("javadoc")
 	public static final Field<Event> RESOURCE_TYPE = field("resource-type");
 
 	@SuppressWarnings("javadoc")
@@ -62,6 +72,18 @@ public class Event extends Entity {
 	@SuppressWarnings("javadoc")
 	public static final Field<Event> MESSAGE = field("message");
 
+	@SuppressWarnings("javadoc")
+	public static final Field<Event> FILE = field("file");
+
+	@SuppressWarnings("javadoc")
+	public static final Field<Event> LINE = field("line");
+
+	@SuppressWarnings("javadoc")
+	public static final Field<Event> CONTAINING_CLASS = field("containing-class");
+
+	@SuppressWarnings("javadoc")
+	public static final Field<Event> LATEST_REPORT = field("latest-report");
+
 	// @fmtOff
 	/**
 	 * A type representing a {@link List} of {@link Event} instances
@@ -76,6 +98,15 @@ public class Event extends Entity {
 	private Status status;
 
 	private Date timestamp;
+
+	@SerializedName("run-start-time")
+	private Date runStartTime;
+
+	@SerializedName("run-end-time")
+	private Date runEndTime;
+
+	@SerializedName("report-receive-time")
+	private Date reportReceiveTime;
 
 	@SerializedName("resource-type")
 	private String resourceType;
@@ -93,11 +124,51 @@ public class Event extends Entity {
 
 	private String message;
 
+	private String file;
+
+	private int line;
+
+	@SerializedName("containment-path")
+	private List<String> containmentPath;
+
+	@SerializedName("containing-class")
+	private String containingClass;
+
 	/**
 	 * @return the certname
 	 */
 	public String getCertname() {
 		return certname;
+	}
+
+	/**
+	 * @return the containingClass
+	 */
+	public String getContainingClass() {
+		return containingClass;
+	}
+
+	/**
+	 * @return the containmentPath
+	 */
+	public List<String> getContainmentPath() {
+		return containmentPath == null
+				? Collections.<String> emptyList()
+				: containmentPath;
+	}
+
+	/**
+	 * @return the file
+	 */
+	public String getFile() {
+		return file;
+	}
+
+	/**
+	 * @return the line
+	 */
+	public int getLine() {
+		return line;
 	}
 
 	/**
@@ -136,6 +207,13 @@ public class Event extends Entity {
 	}
 
 	/**
+	 * @return the reportReceiveTime
+	 */
+	public Date getReportReceiveTime() {
+		return reportReceiveTime;
+	}
+
+	/**
 	 * @return the resourceTitle
 	 */
 	public String getResourceTitle() {
@@ -150,6 +228,20 @@ public class Event extends Entity {
 	}
 
 	/**
+	 * @return the runEndTime
+	 */
+	public Date getRunEndTime() {
+		return runEndTime;
+	}
+
+	/**
+	 * @return the runStartTime
+	 */
+	public Date getRunStartTime() {
+		return runStartTime;
+	}
+
+	/**
 	 * @return the status
 	 */
 	public Status getStatus() {
@@ -161,6 +253,46 @@ public class Event extends Entity {
 	 */
 	public Date getTimestamp() {
 		return timestamp;
+	}
+
+	/**
+	 * @param certname
+	 *            the certname to set
+	 */
+	public void setCertname(String certname) {
+		this.certname = certname;
+	}
+
+	/**
+	 * @param containingClass
+	 *            the containingClass to set
+	 */
+	public void setContainingClass(String containingClass) {
+		this.containingClass = containingClass;
+	}
+
+	/**
+	 * @param containmentPath
+	 *            the containmentPath to set
+	 */
+	public void setContainmentPath(List<String> containmentPath) {
+		this.containmentPath = containmentPath;
+	}
+
+	/**
+	 * @param file
+	 *            the file to set
+	 */
+	public void setFile(String file) {
+		this.file = file;
+	}
+
+	/**
+	 * @param line
+	 *            the line to set
+	 */
+	public void setLine(int line) {
+		this.line = line;
 	}
 
 	/**
@@ -196,6 +328,22 @@ public class Event extends Entity {
 	}
 
 	/**
+	 * @param report
+	 *            the report to set
+	 */
+	public void setReport(String report) {
+		this.report = report;
+	}
+
+	/**
+	 * @param reportReceiveTime
+	 *            the reportReceiveTime to set
+	 */
+	public void setReportReceiveTime(Date reportReceiveTime) {
+		this.reportReceiveTime = reportReceiveTime;
+	}
+
+	/**
 	 * @param resourceTitle
 	 *            the resourceTitle to set
 	 */
@@ -209,6 +357,22 @@ public class Event extends Entity {
 	 */
 	public void setResourceType(String resourceType) {
 		this.resourceType = resourceType;
+	}
+
+	/**
+	 * @param runEndTime
+	 *            the runEndTime to set
+	 */
+	public void setRunEndTime(Date runEndTime) {
+		this.runEndTime = runEndTime;
+	}
+
+	/**
+	 * @param runStartTime
+	 *            the runStartTime to set
+	 */
+	public void setRunStartTime(Date runStartTime) {
+		this.runStartTime = runStartTime;
 	}
 
 	/**

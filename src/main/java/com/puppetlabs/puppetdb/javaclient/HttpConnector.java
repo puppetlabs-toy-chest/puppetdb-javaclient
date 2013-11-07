@@ -17,6 +17,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Map;
 
+import com.puppetlabs.puppetdb.javaclient.query.Paging;
+
 /**
  * A connector responsible for all HTTP interactions.
  */
@@ -82,6 +84,22 @@ public interface HttpConnector {
 	 *             if the request could not be completed
 	 */
 	<V> V get(String urlStr, Map<String, String> params, Type type) throws IOException;
+
+	/**
+	 * Executes a HTTP GET request. The http response is expected to be a JSON representation of
+	 * an object of the specified <code>type</code>. The object is parsed and returned.
+	 * 
+	 * @param urlStr
+	 *            The relative URI end-point
+	 * @param pagingAndParams
+	 *            Paging and parameters to include in the URL. Will also receive value of total count header if applicable
+	 * @param type
+	 *            The expected type of the result
+	 * @return An object of the expected type
+	 * @throws IOException
+	 *             if the request could not be completed
+	 */
+	<V, Q> V get(String urlStr, Paging<Q> params, Type type) throws IOException;
 
 	/**
 	 * Patch data to URI

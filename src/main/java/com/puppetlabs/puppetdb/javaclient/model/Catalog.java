@@ -2,6 +2,8 @@ package com.puppetlabs.puppetdb.javaclient.model;
 
 import java.util.List;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * A POJO describing a Puppet Catalog.
  */
@@ -14,12 +16,16 @@ public class Catalog extends Entity {
 
 		private String version;
 
+		@SerializedName("transaction-uuid")
+		private String transactionUUID;
+
 		private List<Edge> edges;
 
 		private List<Resource> resources;
 
 		/**
-		 * Every relationship between any two resources in the catalog, which may have been made with chaining arrows, metaparameters, or the require
+		 * Every relationship between any two resources in the catalog, which may have been made with chaining arrows, metaparameters, or
+		 * the require
 		 * function
 		 * 
 		 * @return the edges
@@ -44,6 +50,17 @@ public class Catalog extends Entity {
 		 */
 		public List<Resource> getResources() {
 			return resources;
+		}
+
+		/**
+		 * A string used to match the catalog with the corresponding report that was issued during the same puppet run. This field may be
+		 * null. (Note: support for this field was introduced in Version 3 of the “replace catalog” command. Versions prior to version 3
+		 * will populate this field with a null value.
+		 * 
+		 * @return The transaction uuid or <code>null</code>
+		 */
+		public String getTransactionUUID() {
+			return transactionUUID;
 		}
 
 		/**
@@ -78,6 +95,14 @@ public class Catalog extends Entity {
 		 */
 		public void setResources(List<Resource> resources) {
 			this.resources = resources;
+		}
+
+		/**
+		 * @param transactionUUID
+		 *            The id to set
+		 */
+		public void setTransactionUUID(String transactionUUID) {
+			this.transactionUUID = transactionUUID;
 		}
 
 		/**
@@ -172,9 +197,9 @@ public class Catalog extends Entity {
 	 * An enum used in the relationship key of an {@link Edge} object.
 	 * </p>
 	 * <p>
-	 * <b>Note:</b> Regardless of the relationship type, the “source” resource is always managed before the “target” resource. This means that,
-	 * functionally speaking, required-by is a synonym of before and subscription-of is a synonym of notifies. In this catalog format, the different
-	 * relationship types preserve information about the origin of the relationship.
+	 * <b>Note:</b> Regardless of the relationship type, the “source” resource is always managed before the “target” resource. This means
+	 * that, functionally speaking, required-by is a synonym of before and subscription-of is a synonym of notifies. In this catalog format,
+	 * the different relationship types preserve information about the origin of the relationship.
 	 * </p>
 	 */
 	public enum Relationship {

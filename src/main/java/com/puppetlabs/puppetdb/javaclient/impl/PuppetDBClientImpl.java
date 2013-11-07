@@ -16,6 +16,7 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,23 +26,31 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpResponseException;
 
+import com.google.gson.annotations.SerializedName;
 import com.google.inject.Inject;
 import com.puppetlabs.puppetdb.javaclient.HttpConnector;
 import com.puppetlabs.puppetdb.javaclient.PuppetDBClient;
-import com.puppetlabs.puppetdb.javaclient.model.Catalog;
-import com.puppetlabs.puppetdb.javaclient.model.Entity;
-import com.puppetlabs.puppetdb.javaclient.model.Event;
-import com.puppetlabs.puppetdb.javaclient.model.Fact;
-import com.puppetlabs.puppetdb.javaclient.model.Facts;
-import com.puppetlabs.puppetdb.javaclient.model.Node;
-import com.puppetlabs.puppetdb.javaclient.model.Report;
-import com.puppetlabs.puppetdb.javaclient.model.Resource;
+import com.puppetlabs.puppetdb.javaclient.model.*;
+import com.puppetlabs.puppetdb.javaclient.model.EventCount.CountBy;
+import com.puppetlabs.puppetdb.javaclient.model.EventCount.SummarizeBy;
 import com.puppetlabs.puppetdb.javaclient.query.Expression;
+import com.puppetlabs.puppetdb.javaclient.query.Paging;
+import com.puppetlabs.puppetdb.javaclient.query.Parameters;
 
 /**
  * Default implementation of the PuppetDBClient
  */
 public class PuppetDBClientImpl implements PuppetDBClient {
+	public static class ServerTime {
+		@SerializedName("server-time")
+		private Date serverTime;
+	}
+
+	public static class ServerVersion {
+		@SerializedName("version")
+		private String version;
+	}
+
 	/**
 	 * Builds a path from the given key and all qualifiers. The key is expected to start, but not end
 	 * with a slash. The qualifiers must not start nor end with a slash. The final string will not
@@ -64,22 +73,12 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 		return bld.toString();
 	}
 
-	/**
-	 * Converts the given query expression into JSON a string and returns singleton map
-	 * where the key is &quot;query&quot; and the value is the JSON representation of the
-	 * given query. This method returns <code>null</code> if the argument is <code>null</code>.
-	 * 
-	 * @param query
-	 *            The query to convert or <code>null</code>
-	 * @return The singleton map or <code>null</code>
-	 */
-	protected static Map<String, String> queryAsMap(Expression<?> query) {
-		if(query == null)
+	private static Map<String, String> paramsAsMap(Parameters<?> params) {
+		if(params == null)
 			return null;
-
-		StringBuilder bld = new StringBuilder();
-		query.toJSON(bld);
-		return Collections.singletonMap("query", bld.toString());
+		Map<String, String> queryParams = new HashMap<String, String>();
+		params.appendTo(queryParams);
+		return queryParams;
 	}
 
 	private final HttpConnector connector;
@@ -100,19 +99,60 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 		this.connector = connector;
 	}
 
+	private void addEventCountParams(Parameters<EventCount> params, Expression<Event> eventQuery, SummarizeBy summarizeBy, CountBy countBy,
+			Map<String, String> queryMap) {
+		if(eventQuery != null)
+			eventQuery.appendTo(queryMap);
+
+		Map<String, String> ecMap = paramsAsMap(params);
+		if(ecMap != null) {
+			String filter = ecMap.remove("query");
+			if(filter != null)
+				queryMap.put("counts-filter", filter);
+			queryMap.putAll(ecMap);
+		}
+
+		if(summarizeBy == null)
+			summarizeBy = SummarizeBy.certname;
+		queryMap.put("summarize-by", summarizeBy.toString());
+
+		// count-by is optional and defaults to certname so we don't add it unless it differs
+		if(countBy != null && countBy != CountBy.certname)
+			queryMap.put("count-by", countBy.toString());
+	}
+
 	@Override
 	public UUID deactivateNode(String node) throws IOException {
 		return postCommand("deactivate node", 1, node);
 	}
 
 	@Override
-	public List<Node> getActiveNodes(Expression<Node> query) throws IOException {
-		return getListResponse("/nodes", queryAsMap(query), Node.LIST);
+	public List<Node> getActiveNodes(Parameters<Node> params) throws IOException {
+		return getListResponse("/nodes", params, Node.LIST);
 	}
 
 	@Override
-	public List<Event> getEvents(Expression<Event> query) throws IOException {
-		return getListResponse("../experimental/events", queryAsMap(query), Event.LIST);
+	public AggregatedEventCount getAggregatedEventCounts(Expression<EventCount> eventCountQuery, Expression<Event> eventQuery,
+			SummarizeBy summarizeBy, CountBy countBy) throws IOException {
+		Map<String, String> queryMap = new HashMap<String, String>();
+		addEventCountParams(eventCountQuery, eventQuery, summarizeBy, countBy, queryMap);
+		return getSingletonResponse("/aggregate-event-counts", queryMap, AggregatedEventCount.class);
+	}
+
+	@Override
+	public List<EventCount> getEventCounts(final Parameters<EventCount> params, final Expression<Event> eventQuery,
+			final SummarizeBy summarizeBy, final CountBy countBy) throws IOException {
+		return getListResponse("/event-counts", new Parameters<EventCount>() {
+			@Override
+			public void appendTo(Map<String, String> queryParams) {
+				addEventCountParams(params, eventQuery, summarizeBy, countBy, queryParams);
+			}
+		}, EventCount.LIST);
+	}
+
+	@Override
+	public List<Event> getEvents(Parameters<Event> params) throws IOException {
+		return getListResponse("/events", params, Event.LIST);
 	}
 
 	@Override
@@ -121,9 +161,9 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	}
 
 	@Override
-	public List<Fact> getFacts(Expression<Fact> query, String... factQualifiers) throws IOException {
+	public List<Fact> getFacts(Parameters<Fact> params, String... factQualifiers) throws IOException {
 		StringBuilder bld = new StringBuilder();
-		return getListResponse(buildPath(bld, "/facts", factQualifiers), queryAsMap(query), Fact.LIST);
+		return getListResponse(buildPath(bld, "/facts", factQualifiers), params, Fact.LIST);
 	}
 
 	/**
@@ -137,12 +177,19 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	 *            Parameters to pass in the request
 	 * @param type
 	 *            The expected return type (must be a generic List declaration)
+	 * @param paging
+	 *            The paging info or <code>null</code>.
 	 * @return The response in list form or an empty list in case no data was found
 	 * @throws IOException
 	 */
-	protected <V> List<V> getListResponse(String uriStr, Map<String, String> params, Type type) throws IOException {
+	protected <V, Q> List<V> getListResponse(String uriStr, Parameters<Q> params, Type type) throws IOException {
 		try {
-			return connector.get(uriStr, params, type);
+			List<V> result;
+			if(params instanceof Paging && ((Paging<?>) params).isIncludeTotal())
+				result = connector.get(uriStr, (Paging<Q>) params, type);
+			else
+				result = connector.get(uriStr, paramsAsMap(params), type);
+			return result;
 		}
 		catch(HttpResponseException e) {
 			if(e.getStatusCode() == HttpStatus.SC_NOT_FOUND)
@@ -187,17 +234,17 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	}
 
 	@Override
-	public List<Fact> getNodeFacts(Expression<Node> query, String node, String... factQualifiers) throws IOException {
+	public List<Fact> getNodeFacts(Parameters<Node> params, String node, String... factQualifiers) throws IOException {
 		StringBuilder bld = new StringBuilder("/nodes/");
 		bld.append(URLEncoder.encode(node, HttpConnector.UTF_8.name()));
-		return getListResponse(buildPath(bld, "/facts", factQualifiers), queryAsMap(query), Resource.LIST);
+		return getListResponse(buildPath(bld, "/facts", factQualifiers), params, Resource.LIST);
 	}
 
 	@Override
-	public List<Resource> getNodeResources(Expression<Node> query, String node, String... resourceQualifiers) throws IOException {
+	public List<Resource> getNodeResources(Parameters<Node> params, String node, String... resourceQualifiers) throws IOException {
 		StringBuilder bld = new StringBuilder("/nodes/");
 		bld.append(URLEncoder.encode(node, HttpConnector.UTF_8.name()));
-		return getListResponse(buildPath(bld, "/resources", resourceQualifiers), queryAsMap(query), Resource.LIST);
+		return getListResponse(buildPath(bld, "/resources", resourceQualifiers), params, Resource.LIST);
 	}
 
 	@Override
@@ -206,14 +253,20 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	}
 
 	@Override
-	public List<Report> getReports(Expression<Report> query) throws IOException {
-		return getListResponse("../experimental/reports", queryAsMap(query), Report.LIST);
+	public List<Report> getReports(Parameters<Report> params) throws IOException {
+		return getListResponse("/reports", params, Report.LIST);
 	}
 
 	@Override
-	public List<Resource> getResources(Expression<Resource> query, String... resourceQualifiers) throws IOException {
+	public List<Resource> getResources(Parameters<Resource> params, String... resourceQualifiers) throws IOException {
 		StringBuilder bld = new StringBuilder();
-		return getListResponse(buildPath(bld, "/resources", resourceQualifiers), queryAsMap(query), Resource.LIST);
+		return getListResponse(buildPath(bld, "/resources", resourceQualifiers), params, Resource.LIST);
+	}
+
+	@Override
+	public Date getServerTime() throws IOException {
+		ServerTime st = getSingletonResponse("/server-time", Collections.<String, String> emptyMap(), ServerTime.class);
+		return st.serverTime;
 	}
 
 	/**
@@ -238,6 +291,12 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 				return null;
 			throw e;
 		}
+	}
+
+	@Override
+	public String getVersion() throws IOException {
+		ServerVersion sv = getSingletonResponse("/version", Collections.<String, String> emptyMap(), ServerVersion.class);
+		return sv.version;
 	}
 
 	protected UUID postCommand(String command, int version, Object payload) throws IOException {

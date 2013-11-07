@@ -39,10 +39,10 @@ public class Resource extends Entity {
 	public static final Field<Resource> EXPORTED = field("exported");
 
 	@SuppressWarnings("javadoc")
-	public static final Field<Resource> SOURCEFILE = field("sourcefile");
+	public static final Field<Resource> FILE = field("file");
 
 	@SuppressWarnings("javadoc")
-	public static final Field<Resource> SOURCELINE = field("sourceline");
+	public static final Field<Resource> LINE = field("line");
 
 	// @fmtOff
 	/**
@@ -51,13 +51,9 @@ public class Resource extends Entity {
 	public static final Type LIST = new TypeToken<List<Resource>>() {}.getType();
 	// @fmtOn
 
-	private Integer sourceline;
+	private Integer line;
 
-	private String sourcefile;
-
-	private Integer line; // Alias used when sending as a catalog resource
-
-	private String file; // Alias used when sending as a catalog resource
+	private String file;
 
 	private Boolean exported;
 
@@ -79,28 +75,24 @@ public class Resource extends Entity {
 	}
 
 	/**
+	 * @return the file
+	 */
+	public String getFile() {
+		return file;
+	}
+
+	/**
+	 * @return the line
+	 */
+	public Integer getLine() {
+		return line;
+	}
+
+	/**
 	 * @return the parameters
 	 */
 	public Map<String, Object> getParameters() {
 		return parameters;
-	}
-
-	/**
-	 * @return the sourcefile
-	 */
-	public String getSourcefile() {
-		return sourcefile == null
-				? file
-				: sourcefile;
-	}
-
-	/**
-	 * @return the sourceline
-	 */
-	public Integer getSourceline() {
-		return sourceline == null
-				? line
-				: sourceline;
 	}
 
 	/**
@@ -152,7 +144,6 @@ public class Resource extends Entity {
 	 *            the file to set
 	 */
 	public void setFile(String file) {
-		this.sourcefile = null;
 		this.file = file;
 	}
 
@@ -161,7 +152,6 @@ public class Resource extends Entity {
 	 *            the line to set
 	 */
 	public void setLine(Integer line) {
-		this.sourceline = null;
 		this.line = line;
 	}
 

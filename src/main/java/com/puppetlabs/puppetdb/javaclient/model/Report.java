@@ -5,6 +5,7 @@ import static com.puppetlabs.puppetdb.javaclient.query.Query.field;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
@@ -38,6 +39,9 @@ public class Report extends Entity {
 	@SuppressWarnings("javadoc")
 	public static final Field<Report> REPORT_FORMAT = field("report-format");
 
+	@SuppressWarnings("javadoc")
+	public static final Field<Report> TRANSACTION_UUID = field("transaction-uuid");
+
 	// @fmtOff
 	/**
 	 * A type representing a {@link List} of {@link Report} instances
@@ -69,6 +73,9 @@ public class Report extends Entity {
 
 	@SerializedName("resource-events")
 	private List<Event> resourceEvents;
+
+	@SerializedName("transaction-uuid")
+	private UUID transactionUUID;
 
 	/**
 	 * @return the certname
@@ -123,10 +130,24 @@ public class Report extends Entity {
 	}
 
 	/**
+	 * @return the resourceEvents
+	 */
+	public List<Event> getResourceEvents() {
+		return resourceEvents;
+	}
+
+	/**
 	 * @return the startTime
 	 */
 	public Date getStartTime() {
 		return startTime;
+	}
+
+	/**
+	 * @return the transactionUUID
+	 */
+	public UUID getTransactionUUID() {
+		return transactionUUID;
 	}
 
 	/**

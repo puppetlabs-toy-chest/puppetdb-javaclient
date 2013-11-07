@@ -17,7 +17,7 @@ package com.puppetlabs.puppetdb.javaclient.query;
  *            The type that this expression should be applied to
  * @see Query
  */
-public interface Expression<T> {
+public interface Expression<T> extends Parameters<T> {
 	/**
 	 * Produce a JSON representation of this expression onto
 	 * the given <code>result</code> builder

@@ -24,7 +24,7 @@ public interface APIPreferences {
 	File getCaCertPEM();
 
 	/**
-	 * Mandatory setting. Returns the path of the PEM file for the Certificate.
+	 * Returns the path of the PEM file for the Certificate. This setting is mandatory when using SSL
 	 * 
 	 * @return An absolute path
 	 */
@@ -38,18 +38,11 @@ public interface APIPreferences {
 	int getConnectTimeout();
 
 	/**
-	 * Mandatory setting. Returns the path of the PEM file for the Private Key.
+	 * Returns the path of the PEM file for the Private Key. This setting is mandatory when using SSL
 	 * 
 	 * @return An absolute path
 	 */
 	File getPrivateKeyPEM();
-
-	/**
-	 * Read timeout in milliseconds.
-	 * 
-	 * @return A millisecond timeout
-	 */
-	int getSoTimeout();
 
 	/**
 	 * Mandatory setting. The DNS name of the PuppetDB host
@@ -59,11 +52,18 @@ public interface APIPreferences {
 	String getServiceHostname();
 
 	/**
-	 * Mandatory setting. The SSL port of the PuppetDB host
+	 * Mandatory setting. The port of the PuppetDB host
 	 * 
 	 * @return A port number
 	 */
-	int getServiceSSLPort();
+	int getServicePort();
+
+	/**
+	 * Read timeout in milliseconds.
+	 * 
+	 * @return A millisecond timeout
+	 */
+	int getSoTimeout();
 
 	/**
 	 * If <code>true</code> then the SSL host name validation will be turned off.

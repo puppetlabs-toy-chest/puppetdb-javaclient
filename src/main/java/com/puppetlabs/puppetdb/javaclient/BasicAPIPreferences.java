@@ -88,7 +88,7 @@ public class BasicAPIPreferences implements APIPreferences {
 	}
 
 	@Override
-	public int getServiceSSLPort() {
+	public int getServicePort() {
 		return serviceSSLPort;
 	}
 

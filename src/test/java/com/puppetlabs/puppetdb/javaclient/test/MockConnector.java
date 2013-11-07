@@ -21,6 +21,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.puppetlabs.puppetdb.javaclient.HttpConnector;
 import com.puppetlabs.puppetdb.javaclient.impl.GsonProvider;
+import com.puppetlabs.puppetdb.javaclient.query.Paging;
 
 @SuppressWarnings("javadoc")
 public class MockConnector implements HttpConnector {
@@ -128,6 +130,14 @@ public class MockConnector implements HttpConnector {
 
 		// Convert to expected type
 		return gson.fromJson(gson.toJson(mock), type);
+	}
+
+	@Override
+	public <V, Q> V get(String urlStr, Paging<Q> params, Type type) throws IOException {
+		Map<String, String> queryParams = new HashMap<String, String>();
+		if(params != null)
+			params.appendTo(queryParams);
+		return get(urlStr, queryParams, type);
 	}
 
 	@Override

@@ -11,22 +11,33 @@
 package com.puppetlabs.puppetdb.javaclient;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.puppetlabs.puppetdb.javaclient.model.Catalog;
-import com.puppetlabs.puppetdb.javaclient.model.Event;
-import com.puppetlabs.puppetdb.javaclient.model.Fact;
-import com.puppetlabs.puppetdb.javaclient.model.Facts;
-import com.puppetlabs.puppetdb.javaclient.model.Node;
-import com.puppetlabs.puppetdb.javaclient.model.Report;
-import com.puppetlabs.puppetdb.javaclient.model.Resource;
+import com.puppetlabs.puppetdb.javaclient.model.*;
+import com.puppetlabs.puppetdb.javaclient.model.EventCount.CountBy;
+import com.puppetlabs.puppetdb.javaclient.model.EventCount.SummarizeBy;
 import com.puppetlabs.puppetdb.javaclient.query.Expression;
+import com.puppetlabs.puppetdb.javaclient.query.OrderBy;
+import com.puppetlabs.puppetdb.javaclient.query.Paging;
+import com.puppetlabs.puppetdb.javaclient.query.Parameters;
+import com.puppetlabs.puppetdb.javaclient.query.Query;
 
 /**
- * The PuppetDBClient implements the PuppetDB API. It contains all methods needed to
- * query for nodes, facts, resources, and reports.
+ * <p>
+ * The PuppetDBClient implements the PuppetDB API. It contains all methods needed to query for nodes, facts, resources, and reports.
+ * </p>
+ * <p>
+ * Methods that returns lists can perform ordering and paging. This is done by wrapping the {@link Expression query terms} in an
+ * {@link OrderBy} instance using the method {@link Query#orderBy(Expression, List)}. The <code>OrderBy</code> instance can then be passed
+ * to the {@link Paging#Paging(OrderBy, int, int, boolean)} constructor. The OrderBy can be skipped instead using the constructor
+ * {@link Paging#Paging(Expression, int, int, boolean)} and the expression can be omitted by just passing it as <code>null</code> (this
+ * applies to both OrderBy and Paging).
+ * 
+ * @see OrderBy
+ * @see Paging
  */
 public interface PuppetDBClient {
 
@@ -46,7 +57,56 @@ public interface PuppetDBClient {
 	 * @return The list of matching nodes. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
-	List<Node> getActiveNodes(Expression<Node> query) throws IOException;
+	List<Node> getActiveNodes(Parameters<Node> query) throws IOException;
+
+	/**
+	 * This will return count information about all of the resource events matching the given query. For a given object type (resource,
+	 * containing-class, or node), you can retrieve counts of the number of events on objects of that type that had a status of success,
+	 * failure, noop, or skip.
+	 * 
+	 * @param query
+	 *            The query used to filter the returned set.
+	 * @return The list of matching events. Can be empty but never <code>null</code>.
+	 * @throws IOException
+	 */
+
+	/**
+	 * This will return aggregated count information about all of the resource events matching the given query.
+	 * 
+	 * @param params
+	 *            Pagination, OrderBy or query Expression that will be applied to the final result
+	 * @param eventQuery
+	 *            Query that filters the events to consider
+	 * @param summarizeBy
+	 *            Specifies which type of object you’d like to see counts for. Defaults to {@link SummarizeBy#CERTNAME}
+	 * @param countBy
+	 *            A string specifying what type of object is counted when building up the counts of successes, failures, noops,
+	 *            and skips. Defaults to {@link CountBy#CERTNAME}
+	 * @return The list of event counts
+	 * @throws IOException
+	 */
+	AggregatedEventCount getAggregatedEventCounts(Expression<EventCount> eventCountQuery, Expression<Event> eventQuery,
+			SummarizeBy summarizeBy, CountBy countBy) throws IOException;
+
+	/**
+	 * This will return count information about all of the resource events matching the given query. For a given object type (resource,
+	 * containing-class, or node), you can retrieve counts of the number of events on objects of that type that had a status of success,
+	 * failure, noop, or skip.
+	 * 
+	 * @param params
+	 *            Pagination, OrderBy or query Expression that will be applied to the final result
+	 * @param eventQuery
+	 *            Query that filters the events to consider
+	 * @param summarizeBy
+	 *            Specifies which type of object you’d like to see counts for. Defaults to {@link SummarizeBy#CERTNAME}
+	 * @param countBy
+	 *            A string specifying what type of object is counted when building up the counts of successes, failures, noops,
+	 *            and skips. Defaults to {@link CountBy#CERTNAME}
+	 * @return The list of event counts
+	 * @throws IOException
+	 */
+	List<EventCount> getEventCounts(Parameters<EventCount> params, Expression<Event> eventQuery, SummarizeBy summarizeBy, CountBy countBy)
+			throws IOException;
 
 	/**
 	 * Queries the database for events.
@@ -56,7 +116,7 @@ public interface PuppetDBClient {
 	 * @return The list of matching events. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
-	List<Event> getEvents(Expression<Event> query) throws IOException;
+	List<Event> getEvents(Parameters<Event> query) throws IOException;
 
 	/**
 	 * Queries the database for an alphabetical list of all known fact names <i>including</i> those
@@ -78,14 +138,13 @@ public interface PuppetDBClient {
 	 * @return The list of matching facts. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
-	List<Fact> getFacts(Expression<Fact> query, String... factQualifiers) throws IOException;
+	List<Fact> getFacts(Parameters<Fact> query, String... factQualifiers) throws IOException;
 
 	/**
 	 * Returns a map attributes for the metric identified by the given <code>metricName</code>.
 	 * 
 	 * @param metricName
 	 *            The name of a valid MBean</li>
-	 * 
 	 * @return A map of metric attributes where the key is the name of the attribute and the
 	 *         value is the attribute value (a String, Number, or Boolean)
 	 * @throws IOException
@@ -117,7 +176,7 @@ public interface PuppetDBClient {
 	 * @return The list of matching facts. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
-	List<Fact> getNodeFacts(Expression<Node> query, String node, String... factQualifiers) throws IOException;
+	List<Fact> getNodeFacts(Parameters<Node> query, String node, String... factQualifiers) throws IOException;
 
 	/**
 	 * Queries the database for resources that belongs to a specific node. The resources can be qualified by
@@ -132,14 +191,13 @@ public interface PuppetDBClient {
 	 * @return The list of matching resources. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
-	List<Resource> getNodeResources(Expression<Node> query, String node, String... resourceQualifiers) throws IOException;
+	List<Resource> getNodeResources(Parameters<Node> query, String node, String... resourceQualifiers) throws IOException;
 
 	/**
 	 * Queries the database for the status of a specific node.
 	 * 
 	 * @param node
 	 *            The node for which to obtain status.
-	 * 
 	 * @return The node status or <code>null</code> if it the node could not be found.
 	 * @throws IOException
 	 */
@@ -153,7 +211,7 @@ public interface PuppetDBClient {
 	 * @return The list of matching reports. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
-	List<Report> getReports(Expression<Report> query) throws IOException;
+	List<Report> getReports(Parameters<Report> query) throws IOException;
 
 	/**
 	 * Queries the database for resources. The resources can be qualified by
@@ -166,7 +224,21 @@ public interface PuppetDBClient {
 	 * @return The list of matching resources. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
-	List<Resource> getResources(Expression<Resource> query, String... resourceQualifiers) throws IOException;
+	List<Resource> getResources(Parameters<Resource> query, String... resourceQualifiers) throws IOException;
+
+	/**
+	 * Returns the current time from the clock on the PuppetDB server
+	 * 
+	 * @return The current time on the PuppetDB server
+	 */
+	Date getServerTime() throws IOException;
+
+	/**
+	 * Returns the version of the running PuppetDB server
+	 * 
+	 * @return The version of the server
+	 */
+	String getVersion() throws IOException;
 
 	/**
 	 * @param catalog

@@ -10,17 +10,30 @@
  */
 package com.puppetlabs.puppetdb.javaclient.query;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.puppetlabs.puppetdb.javaclient.impl.GsonProvider;
 import com.puppetlabs.puppetdb.javaclient.model.Fact;
 import com.puppetlabs.puppetdb.javaclient.model.Node;
 import com.puppetlabs.puppetdb.javaclient.model.Resource;
+import com.puppetlabs.puppetdb.javaclient.query.OrderBy.OrderByField;
 
 /**
  * Helper class for building queries consisting of one or several expressions.
  */
 public abstract class Query {
+	static abstract class AbstractExpression<T> implements Expression<T> {
+		@Override
+		public void appendTo(Map<String, String> queryParameters) {
+			StringBuilder bld = new StringBuilder();
+			toJSON(bld);
+			queryParameters.put("query", bld.toString());
+		}
+	}
+
 	static class Binary<T> extends OpExpression<T> {
 		private final Identifier<T> lhs;
 
@@ -48,7 +61,7 @@ public abstract class Query {
 		}
 	}
 
-	static class Literal<T> implements Expression<T> {
+	static class Literal<T> extends AbstractExpression<T> {
 		private final Object literal;
 
 		Literal(Object literal) {
@@ -93,7 +106,7 @@ public abstract class Query {
 		}
 	}
 
-	static abstract class OpExpression<T> implements Expression<T> {
+	static abstract class OpExpression<T> extends AbstractExpression<T> {
 		private final String operator;
 
 		OpExpression(String operator) {
@@ -316,7 +329,8 @@ public abstract class Query {
 	 * <p>
 	 * <b>Matches if:</b> the field’s actual value matches the provided regular expression.
 	 * <p>
-	 * The following example would match if the <code>certname</code> field’s actual value resembled something like <code>www03.example.com</code>
+	 * The following example would match if the <code>certname</code> field’s actual value resembled something like
+	 * <code>www03.example.com</code>
 	 * </p>
 	 * 
 	 * <pre>
@@ -381,6 +395,78 @@ public abstract class Query {
 	 */
 	public static <T> Expression<T> or(List<Expression<T>> expressions) {
 		return new NAry<T>(expressions, "or");
+	}
+
+	/**
+	 * Order the result obtained using the given <code>expression</code> using <code>fields</code>.
+	 * 
+	 * @param expression
+	 *            The query expression
+	 * @param fields
+	 *            The fields to order by
+	 * @return The created OrderBy instance
+	 */
+	public static <T> OrderBy<T> orderBy(Expression<T> expression, List<OrderByField<T>> fields) {
+		return new OrderBy<T>(expression, fields);
+	}
+
+	/**
+	 * Order the result obtained using the given <code>expression</code> using <code>fields</code>.
+	 * 
+	 * @param expression
+	 *            The query expression
+	 * @param field
+	 *            The field to order by
+	 * @return The created OrderBy instance
+	 */
+	public static <T> OrderBy<T> orderBy(Expression<T> expression, OrderByField<T> field) {
+		return orderBy(expression, Collections.singletonList(field));
+	}
+
+	/**
+	 * Order the result obtained using the given <code>expression</code> using <code>fields</code>.
+	 * 
+	 * @param expression
+	 *            The query expression
+	 * @param field
+	 *            The primary field to order by
+	 * @param field
+	 *            The secondary field to order by
+	 * @return The created OrderBy instance
+	 */
+	public static <T> OrderBy<T> orderBy(Expression<T> expression, OrderByField<T> field1, OrderByField<T> field2) {
+		@SuppressWarnings("unchecked")
+		List<OrderByField<T>> list = Arrays.asList(field1, field2);
+		return orderBy(expression, list);
+	}
+
+	/**
+	 * Order the result using the given <code>field</code> in either ascending or descending order given
+	 * the boolean <code>descending</code> parameter.
+	 * 
+	 * @param field
+	 *            The field to order by
+	 * @param descending
+	 *            <code>false</code> for ascending order, <code>true</code> for descending order
+	 * @return
+	 */
+	public static <T> OrderByField<T> orderByField(Field<T> field, boolean descending) {
+		return new OrderByField<T>(field, descending);
+	}
+
+	/**
+	 * Paginate the ordered result obtained using the given <code>orderBy</code> in accordance with <code>offset</code> and
+	 * <code>limit</code>. If the <code>includeTotal</code> parameter is set, then the total number of entries can be retrieved
+	 * from the in the result when the query is executed.
+	 * 
+	 * @param orderBy
+	 * @param offset
+	 * @param limit
+	 * @param includeTotal
+	 * @return
+	 */
+	public static <T> Parameters<T> paging(OrderBy<T> orderBy, int offset, int limit, boolean includeTotal) {
+		return new Paging<T>(orderBy, offset, limit, includeTotal);
 	}
 
 	/**

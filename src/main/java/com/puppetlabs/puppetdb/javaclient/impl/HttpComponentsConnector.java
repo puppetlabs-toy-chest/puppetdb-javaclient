@@ -10,16 +10,20 @@
  */
 package com.puppetlabs.puppetdb.javaclient.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -42,11 +46,15 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
+import com.puppetlabs.puppetdb.javaclient.APIException;
 import com.puppetlabs.puppetdb.javaclient.APIPreferences;
 import com.puppetlabs.puppetdb.javaclient.HttpConnector;
+import com.puppetlabs.puppetdb.javaclient.query.Paging;
 
 /**
  * Class responsible for all HTTP request and response processing. Based on the
@@ -59,6 +67,30 @@ public class HttpComponentsConnector implements HttpConnector {
 			return null;
 
 		return entity.getContent();
+	}
+
+	protected static <T> T parseJson(Gson gson, InputStream stream, Type type) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream, HttpConnector.UTF_8), 2048);
+		StringBuilder bld = new StringBuilder();
+		String line;
+		while((line = reader.readLine()) != null) {
+			bld.append(line);
+			bld.append('\n');
+		}
+		try {
+			return gson.fromJson(bld.toString(), type);
+		}
+		catch(JsonSyntaxException jpe) {
+			throw new APIException("Parse exception converting JSON to object", jpe); //$NON-NLS-1$
+		}
+		finally {
+			try {
+				reader.close();
+			}
+			catch(IOException ignored) {
+				// Ignored
+			}
+		}
 	}
 
 	private final Gson gson;
@@ -120,6 +152,23 @@ public class HttpComponentsConnector implements HttpConnector {
 		request.addHeader(HttpHeaders.USER_AGENT, USER_AGENT);
 	}
 
+	/**
+	 * Create exception from response
+	 * 
+	 * @param response
+	 * @param code
+	 * @param status
+	 * @return non-null newly {@link IOException}
+	 */
+	protected HttpResponseException createException(InputStream response, int code, String status) {
+		String message;
+		if(status != null && status.length() > 0)
+			message = status;
+		else
+			message = "Unknown error occurred";
+		return new HttpResponseException(code, message);
+	}
+
 	private HttpGet createGetRequest(String urlStr, Map<String, String> params) {
 		StringBuilder bld = new StringBuilder(createURI(urlStr));
 		if(params != null && !params.isEmpty()) {
@@ -139,16 +188,21 @@ public class HttpComponentsConnector implements HttpConnector {
 	 * @return uri
 	 */
 	protected String createURI(String path) {
-		StringBuilder bld = new StringBuilder("https://");
+		StringBuilder bld = new StringBuilder();
+		if(preferences.getCertPEM() == null)
+			bld.append("http://");
+		else
+			bld.append("https://");
+
 		bld.append(preferences.getServiceHostname());
 		bld.append(':');
-		bld.append(preferences.getServiceSSLPort());
+		bld.append(preferences.getServicePort());
 		bld.append('/');
 		if(path.startsWith("../"))
-			// Skip the 'v2' part (this is probably ../experimental/<something>
+			// Skip the 'v3' part (this is probably ../experimental/<something>
 			bld.append(path, 3, path.length());
 		else {
-			bld.append("v2");
+			bld.append("v3");
 			bld.append(path);
 		}
 		return bld.toString();
@@ -158,7 +212,7 @@ public class HttpComponentsConnector implements HttpConnector {
 	public void delete(final String uri) throws IOException {
 		HttpDelete request = new HttpDelete(createURI(uri));
 		configureRequest(request);
-		executeRequest(request, null);
+		executeRequest(request, null, null);
 	}
 
 	@Override
@@ -184,10 +238,46 @@ public class HttpComponentsConnector implements HttpConnector {
 		currentRequest = null;
 	}
 
-	protected <V> V executeRequest(final HttpRequestBase request, final Type type) throws IOException {
+	protected <V> V executeRequest(final HttpRequestBase request, final Type type, int[] totalCount) throws IOException {
 		startRequest(request);
 		try {
-			return httpClient.execute(request, new JSonResponseHandler<V>(gson, type));
+			HttpResponse response = httpClient.execute(request);
+			StatusLine statusLine = response.getStatusLine();
+			int code = statusLine.getStatusCode();
+			if(code >= 300) {
+				String msg;
+				try {
+					msg = EntityUtils.toString(response.getEntity());
+					if(msg == null)
+						msg = statusLine.getReasonPhrase();
+					else {
+						msg = statusLine.getReasonPhrase() + ": " + msg;
+					}
+				}
+				catch(Exception e) {
+					// Just skip
+					msg = statusLine.getReasonPhrase();
+				}
+				throw new HttpResponseException(statusLine.getStatusCode(), msg);
+			}
+
+			HttpEntity entity = response.getEntity();
+			if(isOk(code)) {
+				if(type == null)
+					return null;
+
+				if(totalCount != null) {
+					Header xrecs = response.getFirstHeader("X-Records");
+					if(xrecs != null)
+						try {
+							totalCount[0] = Integer.parseInt(xrecs.getValue());
+						}
+						catch(NumberFormatException e) {
+						}
+				}
+				return parseJson(gson, getStream(entity), type);
+			}
+			throw createException(getStream(entity), code, statusLine.getReasonPhrase());
 		}
 		finally {
 			endRequest();
@@ -198,7 +288,42 @@ public class HttpComponentsConnector implements HttpConnector {
 	public <V> V get(String urlStr, Map<String, String> params, Type type) throws IOException {
 		HttpGet request = createGetRequest(urlStr, params);
 		configureRequest(request);
-		return executeRequest(request, type);
+		return executeRequest(request, type, null);
+	}
+
+	@Override
+	public <V, Q> V get(String urlStr, Paging<Q> params, Type type) throws IOException {
+		Map<String, String> queryParams = null;
+		int[] totalCount = null;
+		if(params != null) {
+			queryParams = new HashMap<String, String>();
+			params.appendTo(queryParams);
+			totalCount = new int[] { -1 };
+		}
+		HttpGet request = createGetRequest(urlStr, queryParams);
+		configureRequest(request);
+		V result = executeRequest(request, type, totalCount);
+		if(params != null)
+			params.setTotalCount(totalCount[0]);
+		return result;
+	}
+
+	/**
+	 * Does status code denote a non-error response?
+	 * 
+	 * @param code
+	 * @return true if okay, false otherwise
+	 */
+	protected boolean isOk(final int code) {
+		switch(code) {
+			case HttpStatus.SC_OK:
+			case HttpStatus.SC_CREATED:
+			case HttpStatus.SC_ACCEPTED:
+			case HttpStatus.SC_NO_CONTENT: // weird, but returned by DELETE calls
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	@Override
@@ -214,7 +339,7 @@ public class HttpComponentsConnector implements HttpConnector {
 
 		configureRequest(request);
 		assignContent(request, params);
-		return executeRequest(request, type);
+		return executeRequest(request, type, null);
 	}
 
 	@Override
@@ -222,7 +347,7 @@ public class HttpComponentsConnector implements HttpConnector {
 		HttpPost request = new HttpPost(createURI(uri));
 		configureRequest(request);
 		assignContent(request, params);
-		return executeRequest(request, type);
+		return executeRequest(request, type, null);
 	}
 
 	@Override
@@ -242,7 +367,7 @@ public class HttpComponentsConnector implements HttpConnector {
 			}
 		});
 		request.setEntity(entity);
-		return executeRequest(request, type);
+		return executeRequest(request, type, null);
 	}
 
 	@Override
@@ -250,7 +375,7 @@ public class HttpComponentsConnector implements HttpConnector {
 		HttpPut request = new HttpPut(createURI(uri));
 		configureRequest(request);
 		assignContent(request, params);
-		return executeRequest(request, type);
+		return executeRequest(request, type, null);
 	}
 
 	private synchronized void startRequest(HttpRequestBase request) {
