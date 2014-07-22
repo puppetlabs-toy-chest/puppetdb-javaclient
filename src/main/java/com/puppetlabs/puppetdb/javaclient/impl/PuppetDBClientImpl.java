@@ -4,7 +4,7 @@
  * are made available under the terms of the Apache License, Version 2.0
  * which accompanies this distribution, and is available at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Contributors:
  *   Puppet Labs
  */
@@ -55,7 +55,7 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	 * Builds a path from the given key and all qualifiers. The key is expected to start, but not end
 	 * with a slash. The qualifiers must not start nor end with a slash. The final string will not
 	 * end with a slash.
-	 * 
+	 *
 	 * @param bld
 	 *            The receiver of the path
 	 * @param key
@@ -90,7 +90,7 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	 * <p>
 	 * <b>For Guice injection only.</b> Don't use this constructor from code
 	 * </p>
-	 * 
+	 *
 	 * @param connector
 	 *            The connector responsible for all HTTP requests
 	 */
@@ -141,7 +141,7 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 
 	@Override
 	public List<EventCount> getEventCounts(final Parameters<EventCount> params, final Expression<Event> eventQuery,
-			final SummarizeBy summarizeBy, final CountBy countBy) throws IOException {
+		final SummarizeBy summarizeBy, final CountBy countBy) throws IOException {
 		return getListResponse("/event-counts", new Parameters<EventCount>() {
 			@Override
 			public void appendTo(Map<String, String> queryParams) {
@@ -170,7 +170,7 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	 * Executes the request and converts the result into a list of the desired <code>type</code>. If the request results in a
 	 * {@link HttpStatus#SC_NOT_FOUND}, then this method will
 	 * return an empty list.
-	 * 
+	 *
 	 * @param uriStr
 	 *            The relative path to the endpoint
 	 * @param params
@@ -202,7 +202,7 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	 * Executes the request and converts the result into a map of the desired <code>type</code>. If the request results in a
 	 * {@link HttpStatus#SC_NOT_FOUND}, then this method will
 	 * return an empty map.
-	 * 
+	 *
 	 * @param uriStr
 	 *            The relative path to the endpoint
 	 * @param params
@@ -234,14 +234,14 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	}
 
 	@Override
-	public List<Fact> getNodeFacts(Parameters<Node> params, String node, String... factQualifiers) throws IOException {
+	public List<Fact> getNodeFacts(Parameters<Fact> params, String node, String... factQualifiers) throws IOException {
 		StringBuilder bld = new StringBuilder("/nodes/");
 		bld.append(URLEncoder.encode(node, HttpConnector.UTF_8.name()));
-		return getListResponse(buildPath(bld, "/facts", factQualifiers), params, Resource.LIST);
+		return getListResponse(buildPath(bld, "/facts", factQualifiers), params, Fact.LIST);
 	}
 
 	@Override
-	public List<Resource> getNodeResources(Parameters<Node> params, String node, String... resourceQualifiers) throws IOException {
+	public List<Resource> getNodeResources(Parameters<Resource> params, String node, String... resourceQualifiers) throws IOException {
 		StringBuilder bld = new StringBuilder("/nodes/");
 		bld.append(URLEncoder.encode(node, HttpConnector.UTF_8.name()));
 		return getListResponse(buildPath(bld, "/resources", resourceQualifiers), params, Resource.LIST);
@@ -272,7 +272,7 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 	/**
 	 * Executes the request and converts the result into an object of the desired <code>type</code>. If the request results in a
 	 * {@link HttpStatus#SC_NOT_FOUND}, then this method will return <code>null</code>.
-	 * 
+	 *
 	 * @param uriStr
 	 *            The relative path to the endpoint
 	 * @param params
@@ -319,7 +319,7 @@ public class PuppetDBClientImpl implements PuppetDBClient {
 		CommandResponse response = connector.post("/commands/", params, CommandResponse.class);
 		return response == null
 				? null
-				: UUID.fromString(response.getUuid());
+						: UUID.fromString(response.getUuid());
 	}
 
 	@Override

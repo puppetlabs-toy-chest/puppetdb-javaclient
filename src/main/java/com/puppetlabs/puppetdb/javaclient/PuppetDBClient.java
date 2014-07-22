@@ -4,7 +4,7 @@
  * are made available under the terms of the Apache License, Version 2.0
  * which accompanies this distribution, and is available at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Contributors:
  *   Puppet Labs
  */
@@ -35,7 +35,7 @@ import com.puppetlabs.puppetdb.javaclient.query.Query;
  * to the {@link Paging#Paging(OrderBy, int, int, boolean)} constructor. The OrderBy can be skipped instead using the constructor
  * {@link Paging#Paging(Expression, int, int, boolean)} and the expression can be omitted by just passing it as <code>null</code> (this
  * applies to both OrderBy and Paging).
- * 
+ *
  * @see OrderBy
  * @see Paging
  */
@@ -51,7 +51,7 @@ public interface PuppetDBClient {
 
 	/**
 	 * Queries the database for active nodes.
-	 * 
+	 *
 	 * @param query
 	 *            The query used to filter the returned set.
 	 * @return The list of matching nodes. Can be empty but never <code>null</code>.
@@ -63,7 +63,7 @@ public interface PuppetDBClient {
 	 * This will return count information about all of the resource events matching the given query. For a given object type (resource,
 	 * containing-class, or node), you can retrieve counts of the number of events on objects of that type that had a status of success,
 	 * failure, noop, or skip.
-	 * 
+	 *
 	 * @param query
 	 *            The query used to filter the returned set.
 	 * @return The list of matching events. Can be empty but never <code>null</code>.
@@ -72,7 +72,7 @@ public interface PuppetDBClient {
 
 	/**
 	 * This will return aggregated count information about all of the resource events matching the given query.
-	 * 
+	 *
 	 * @param params
 	 *            Pagination, OrderBy or query Expression that will be applied to the final result
 	 * @param eventQuery
@@ -92,7 +92,7 @@ public interface PuppetDBClient {
 	 * This will return count information about all of the resource events matching the given query. For a given object type (resource,
 	 * containing-class, or node), you can retrieve counts of the number of events on objects of that type that had a status of success,
 	 * failure, noop, or skip.
-	 * 
+	 *
 	 * @param params
 	 *            Pagination, OrderBy or query Expression that will be applied to the final result
 	 * @param eventQuery
@@ -110,7 +110,7 @@ public interface PuppetDBClient {
 
 	/**
 	 * Queries the database for events.
-	 * 
+	 *
 	 * @param query
 	 *            The query used to filter the returned set.
 	 * @return The list of matching events. Can be empty but never <code>null</code>.
@@ -121,7 +121,7 @@ public interface PuppetDBClient {
 	/**
 	 * Queries the database for an alphabetical list of all known fact names <i>including</i> those
 	 * which are known only for deactivated nodes.
-	 * 
+	 *
 	 * @return The alphabetical list of names. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
@@ -130,7 +130,7 @@ public interface PuppetDBClient {
 	/**
 	 * Queries the database for facts. The facts can be qualified by
 	 * name and value as additional qualifiers.
-	 * 
+	 *
 	 * @param query
 	 *            The query used to filter the returned set.
 	 * @param factQualifiers
@@ -142,7 +142,7 @@ public interface PuppetDBClient {
 
 	/**
 	 * Returns a map attributes for the metric identified by the given <code>metricName</code>.
-	 * 
+	 *
 	 * @param metricName
 	 *            The name of a valid MBean</li>
 	 * @return A map of metric attributes where the key is the name of the attribute and the
@@ -157,7 +157,7 @@ public interface PuppetDBClient {
 	 * <li>The key is the name of a valid MBean</li>
 	 * <li>The value is a string representing a URI to use for requesting that MBean's attributes</li>
 	 * </ul>
-	 * 
+	 *
 	 * @return A map with mbean => URI mappings
 	 * @throws IOException
 	 */
@@ -166,7 +166,7 @@ public interface PuppetDBClient {
 	/**
 	 * Queries the database for facts that belongs to a specific node. The facts can be qualified by
 	 * specifying fact name and fact value as additional qualifiers.
-	 * 
+	 *
 	 * @param query
 	 *            The query used to filter the returned set.
 	 * @param node
@@ -176,12 +176,12 @@ public interface PuppetDBClient {
 	 * @return The list of matching facts. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
-	List<Fact> getNodeFacts(Parameters<Node> query, String node, String... factQualifiers) throws IOException;
+	List<Fact> getNodeFacts(Parameters<Fact> query, String node, String... factQualifiers) throws IOException;
 
 	/**
 	 * Queries the database for resources that belongs to a specific node. The resources can be qualified by
 	 * specifying resource type and resource title as additional qualifiers.
-	 * 
+	 *
 	 * @param query
 	 *            The query used to filter the returned set.
 	 * @param node
@@ -191,11 +191,11 @@ public interface PuppetDBClient {
 	 * @return The list of matching resources. Can be empty but never <code>null</code>.
 	 * @throws IOException
 	 */
-	List<Resource> getNodeResources(Parameters<Node> query, String node, String... resourceQualifiers) throws IOException;
+	List<Resource> getNodeResources(Parameters<Resource> query, String node, String... resourceQualifiers) throws IOException;
 
 	/**
 	 * Queries the database for the status of a specific node.
-	 * 
+	 *
 	 * @param node
 	 *            The node for which to obtain status.
 	 * @return The node status or <code>null</code> if it the node could not be found.
@@ -205,7 +205,7 @@ public interface PuppetDBClient {
 
 	/**
 	 * Queries the database for reports.
-	 * 
+	 *
 	 * @param query
 	 *            The query used to filter the returned set.
 	 * @return The list of matching reports. Can be empty but never <code>null</code>.
@@ -216,7 +216,7 @@ public interface PuppetDBClient {
 	/**
 	 * Queries the database for resources. The resources can be qualified by
 	 * specifying resource type and resource title as additional qualifiers.
-	 * 
+	 *
 	 * @param query
 	 *            The query used to filter the returned set.
 	 * @param resourceQualifiers
@@ -228,14 +228,14 @@ public interface PuppetDBClient {
 
 	/**
 	 * Returns the current time from the clock on the PuppetDB server
-	 * 
+	 *
 	 * @return The current time on the PuppetDB server
 	 */
 	Date getServerTime() throws IOException;
 
 	/**
 	 * Returns the version of the running PuppetDB server
-	 * 
+	 *
 	 * @return The version of the server
 	 */
 	String getVersion() throws IOException;
