@@ -1,3 +1,6 @@
+Important: This project is not supported or maintained by Puppet Labs and is
+incompatible with recent versions of PuppetDB.
+
 # Java Client for the PuppetDB API
 
 PuppetDB is the fast, scalable, and reliable data warehouse for Puppet. This client is
