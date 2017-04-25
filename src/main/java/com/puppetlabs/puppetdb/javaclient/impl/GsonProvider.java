@@ -27,6 +27,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.inject.Provider;
+import com.puppetlabs.puppetdb.javaclient.model.Event;
 
 /**
  * A provider of {@link Gson} instances.
@@ -102,6 +103,7 @@ public class GsonProvider implements Provider<Gson> {
 	static {
 		gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(Date.class, new DateJsonAdapter());
+        gsonBuilder.registerTypeAdapter(Event.class, new EventJsonAdapter());
 		gson = gsonBuilder.create();
 	}
 
